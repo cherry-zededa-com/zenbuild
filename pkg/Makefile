@@ -1,9 +1,18 @@
 # disable content trust for now
 LINUXKIT_OPTS= --disable-content-trust
 
-PKGS = grub xen kernel kmod_pfring xen-tools dnsmasq sgdisk dom0-ztools	\
-	test-cert test-microsvcs qrexec-lib qrexec-dom0 wwan wlan	\
-	mkrootfs-ext4 mkflash
+BUILDARCH ?= $(shell uname -m) # The target CPU architecture == host arch if unspecified.
+
+ifneq ($(strip ${BUILDARCH}),aarch64)
+PKGS += grub dnsmasq sgdisk
+endif
+
+PKGS += xen kernel kmod_pfring xen-tools dom0-ztools	\
+	test-cert test-microsvcs qrexec-lib qrexec-dom0 wwan wlan
+
+ifneq ($(strip ${BUILDARCH}),aarch64)
+PKGS += mkrootfs-ext4 mkflash
+endif
 
 .PHONY: push force-push build forcebuild show-tag clean dockerfiles
 
