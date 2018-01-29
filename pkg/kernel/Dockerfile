@@ -35,6 +35,8 @@ RUN [ $(uname -m) == x86_64 ] && apk add libunwind-dev || true
 
 ENV KERNEL_VERSION 4.9.51
 ENV KERNEL_SERIES 4.9.x
+# Eg: KERNEL_CUST_CONF kernel_config_SUPERMICRO-4.9.x-x86_64
+ARG KERNEL_CUST_CONF
 
 ENV KERNEL_SOURCE=https://www.kernel.org/pub/linux/kernel/v4.x/linux-${KERNEL_VERSION}.tar.xz
 ENV KERNEL_SHA256_SUMS=https://www.kernel.org/pub/linux/kernel/v4.x/sha256sums.asc
@@ -78,7 +80,11 @@ RUN case $(uname -m) in \
         KERNEL_DEF_CONF=/linux/arch/arm64/configs/defconfig; \
         ;; \
     esac  && \
-    cp /linux/kernel_config-${KERNEL_SERIES}-$(uname -m) ${KERNEL_DEF_CONF}; \
+    if [ -z "${KERNEL_CUST_CONF}" ]; then \
+	cp /linux/kernel_config-${KERNEL_SERIES}-$(uname -m) ${KERNEL_DEF_CONF}; \
+    else \
+        cp /linux/${KERNEL_CUST_CONF} ${KERNEL_DEF_CONF}; \
+    fi && \
     if [ -n "${EXTRA}" ]; then \
         sed -i "s/CONFIG_LOCALVERSION=\"-linuxkit\"/CONFIG_LOCALVERSION=\"-linuxkit${EXTRA}\"/" ${KERNEL_DEF_CONF}; \
         if [ "${EXTRA}" = "-dbg" ]; then \
