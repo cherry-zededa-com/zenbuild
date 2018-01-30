@@ -8,8 +8,8 @@
 # Inherit from the parent build, if relevant.
 BUILDARCH ?= $(shell uname -m) 
 
-build: $(wildcard kernel_config-*-${BUILDARCH})
-	docker build --no-cache -f Dockerfile --build-arg KERNEL_CUST_CONF=$? -t zededa/kernel:$? .
+build: kernel_config-*-${BUILDARCH}
+	for KERNEL_CUST_CONF in $?;do docker build --no-cache -f Dockerfile --build-arg KERNEL_CUST_CONF=$$KERNEL_CUST_CONF -t zededa/kernel:$$KERNEL_CUST_CONF . ; done;
 
 push:
 forcepush:
